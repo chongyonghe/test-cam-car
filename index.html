@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beach Cleaning Robot Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+    <script>
+        let map, marker;
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 18,
+                center: { lat: 0, lng: 0 }
+            });
+            marker = new google.maps.Marker({ map: map, position: { lat: 0, lng: 0 } });
+        }
+        function updateLocation(lat, lon) {
+            const newPos = { lat: lat, lng: lon };
+            marker.setPosition(newPos);
+            map.setCenter(newPos);
+        }
+        function fetchLocation() {
+            fetch("http://your-server.com/get_location")
+                .then(response => response.json())
+                .then(data => updateLocation(data.lat, data.lon));
+        }
+        setInterval(fetchLocation, 5000);
+    </script>
+</head>
+
+<body onload="initMap()">
+    <nav class="navbar navbar-expand-lg customernavbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Beach Cleaning Robot</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#map-section">Live GPS Tracking</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#remote-control">Remote Control</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#history">Cleaning History</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#schedule">Schedule Cleaning</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#coverage">Area Coverage Map</a></li>
+                </ul>
+            </div>
+        </div>
+        
+    </nav>
+    <div id="header-image">
+        <img src="21.jpg" alt="" srcset="" width="100%">
+       
+
+    </div>
+      
+        <div>
+            <div class="container1">
+                <section id="map-section">
+                <h3 class="h3ed">📍 Live GPS Tracking</h3>
+                <div id="map" style="width: 100%; height: 400px;">
+                </div>
+            </section>
+            </div>
+        </div>  
+        <section id="remote-control">
+            <h3>⚙️ Remote Control</h3>
+            <button class="btn btn-primary" onclick="sendCommand('start')">Start Cleaning</button>
+            <button class="btn btn-danger" onclick="sendCommand('stop')">Stop Cleaning</button>
+        </section>
+        <hr>
+
+        <section id="history">
+            <h3>📜 Cleaning History</h3>
+            <ul id="history"></ul>
+        </section>
+        <hr>
+
+        <section id="schedule">
+            <h3>📅 Schedule Cleaning</h3>
+            <input type="time" id="scheduleTime" class="form-control w-25 d-inline">
+            <button class="btn btn-success" onclick="setSchedule()">Set Schedule</button>
+        </section>
+        <hr>
+
+        <section id="coverage">
+            <h3>📊 Area Coverage Map</h3>
+            <canvas id="coverageCanvas" width="400" height="400" style="border:1px solid black;"></canvas>
+        </section>
+  
+
+    <script>
+        function sendCommand(command) {
+            fetch("http://your-server.com/control?cmd=" + command);
+        }
+        function setSchedule() {
+            const time = document.getElementById("scheduleTime").value;
+            fetch("http://your-server.com/set_schedule?time=" + time);
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

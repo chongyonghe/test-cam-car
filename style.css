@@ -1,0 +1,95 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    background: #007BFF;
+    color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #333;
+    margin-top: 20px;
+}
+
+#map {
+    width: 90%;
+    height: 400px;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background 0.3s ease-in-out;
+}
+
+button:hover {
+    background: #218838;
+}
+
+#scheduleTime {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+canvas {
+    background: white;
+    margin: 20px auto;
+    display: block;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.container {
+    max-width: 1200px; /* Better for large screens */
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.h3ed {
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+}
+
+.customernavbar {
+    background-color: lightblue;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    
+}
+
+.container1 {
+    background-color: rgb(244, 248, 211);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* Header Image Section */
+#header-image {
+    background: url('12.jpg');
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    background-position: center;
+
+    
+}
+
