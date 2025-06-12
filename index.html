@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>沙滩清洁机器人控制面板</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .navbar {
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: none;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      border-radius: 15px 15px 0 0 !important;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .control-btn { 
+      width: 70px; 
+      height: 70px; 
+      margin: 8px;
+      font-size: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    .control-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #cameraImage { 
+      max-width: 100%; 
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: #000;
+    }
+    .connection-status { 
+      padding: 5px 15px; 
+      border-radius: 20px; 
+      font-weight: bold;
+    }
+    .status-connected {
+      background-color: #28a745;
+      color: white;
+    }
+    .status-disconnected {
+      background-color: #6c757d;
+      color: white;
+    }
+    .status-connecting {
+      background-color: #ffc107;
+      color: #212529;
+    }
+    .status-error {
+      background-color: #dc3545;
+      color: white;
+    }
+    .controls-container {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+      border-radius: 15px;
+      padding: 20px;
+    }
+    .slider-container {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .form-range::-webkit-slider-thumb {
+      background: #0d6efd;
+    }
+    .automation-buttons .btn {
+      padding: 10px 20px;
+      font-size: 1.1rem;
+      border-radius: 50px;
+      margin: 0 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-robot"></i> 沙滩清洁机器人控制面板
+      </a>
+      <div class="d-flex align-items-center">
+        <div class="input-group input-group-sm me-2" style="width: 220px">
+          <span class="input-group-text"><i class="bi bi-wifi"></i></span>
+          <input type="text" id="robotIp" class="form-control" placeholder="机器人IP" value="192.168.4.1">
+          <button id="connectBtn" class="btn btn-outline-success">
+            <span id="connectText">连接</span>
+          </button>
+        </div>
+        <span id="connectionStatus" class="connection-status status-disconnected">未连接</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <i class="bi bi-camera-video"></i> 实时摄像头画面
+          </div>
+          <div class="card-body text-center p-3">
+            <div class="camera-placeholder mb-3" id="cameraPlaceholder">
+              <div class="d-flex justify-content-center align-items-center" style="height: 300px; background: #e9ecef; border-radius: 10px;">
+                <div class="text-center text-secondary">
+                  <i class="bi bi-camera-off" style="font-size: 3rem;"></i>
+                  <p class="mt-2">等待摄像头连接...</p>
+                </div>
+              </div>
+            </div>
+            <img id="cameraImage" src="" class="img-fluid d-none">
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <i class="bi bi-joystick"></i> 机器人控制
+          </div>
+          <div class="card-body">
+            <div class="controls-container">
+              <!-- 方向控制 -->
+              <div class="text-center mb-4">
+                <h5 class="mb-3">方向控制</h5>
+                <button class="btn btn-primary control-btn" id="btnForward">
+                  <i class="bi bi-arrow-up"></i>
+                </button>
+                <div class="d-flex justify-content-center my-2">
+                  <button class="btn btn-primary control-btn" id="btnLeft">
+                    <i class="bi bi-arrow-left"></i>
+                  </button>
+                  <button class="btn btn-danger control-btn" id="btnStop" style="width: 80px; height: 80px;">
+                    <i class="bi bi-stop-circle"></i>
+                  </button>
+                  <button class="btn btn-primary control-btn" id="btnRight">
+                    <i class="bi bi-arrow-right"></i>
+                  </button>
+                </div>
+                <button class="btn btn-primary control-btn" id="btnBackward">
+                  <i class="bi bi-arrow-down"></i>
+                </button>
+              </div>
+              
+              <!-- 参数控制 -->
+              <div class="slider-container">
+                <h5 class="mb-3">参数设置</h5>
+                <div class="mb-4">
+                  <label class="form-label d-flex justify-content-between">
+                    <span><i class="bi bi-speedometer2"></i> 速度控制</span>
+                    <span id="speedValue">150</span>
+                  </label>
+                  <input type="range" min="0" max="255" value="150" class="form-range" id="speedControl">
+                </div>
+                
+                <div class="mb-4">
+                  <label class="form-label d-flex justify-content-between">
+                    <span><i class="bi bi-lightbulb"></i> 灯光控制</span>
+                    <span id="lightValue">0</span>
+                  </label>
+                  <input type="range" min="0" max="255" value="0" class="form-range" id="lightControl">
+                </div>
+              </div>
+              
+              <!-- 自动化控制 -->
+              <div class="automation-buttons text-center mt-4">
+                <h5 class="mb-3">自动化控制</h5>
+                <button class="btn btn-success btn-lg" id="startAutomation">
+                  <i class="bi bi-play-circle"></i> 开始自动清洁
+                </button>
+                <button class="btn btn-danger btn-lg" id="stopAutomation">
+                  <i class="bi bi-stop-circle"></i> 停止自动清洁
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-info text-white">
+            <i class="bi bi-info-circle"></i> 使用说明
+          </div>
+          <div class="card-body">
+            <ol>
+              <li>将机器人上电，它会创建一个WiFi热点（SSID: Cam_Car）</li>
+              <li>将您的设备连接到该WiFi热点</li>
+              <li>确认IP地址为<code>192.168.4.1</code>（默认已填写）</li>
+              <li>点击"连接"按钮</li>
+              <li>连接成功后，您可以使用方向按钮控制机器人移动</li>
+              <li>使用滑块调整速度和灯光亮度</li>
+              <li>点击"开始自动清洁"让机器人自动工作</li>
+            </ol>
+            <div class="alert alert-warning mt-3">
+              <i class="bi bi-exclamation-triangle"></i> 注意：您必须连接到机器人的WiFi热点才能控制它！
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    class RobotController {
+      constructor() {
+        this.robotWebSocket = null;
+        this.cameraWebSocket = null;
+        this.isConnected = false;
+        this.lastIP = localStorage.getItem('lastRobotIP') || '192.168.4.1';
+        
+        this.initElements();
+        this.initEventListeners();
+      }
+
+      initElements() {
+        this.robotIpInput = document.getElementById('robotIp');
+        this.connectBtn = document.getElementById('connectBtn');
+        this.connectText = document.getElementById('connectText');
+        this.connectionStatus = document.getElementById('connectionStatus');
+        this.cameraImage = document.getElementById('cameraImage');
+        this.cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        
+        // 控制元素
+        this.speedControl = document.getElementById('speedControl');
+        this.lightControl = document.getElementById('lightControl');
+        this.btnForward = document.getElementById('btnForward');
+        this.btnBackward = document.getElementById('btnBackward');
+        this.btnLeft = document.getElementById('btnLeft');
+        this.btnRight = document.getElementById('btnRight');
+        this.btnStop = document.getElementById('btnStop');
+        this.startAutomationBtn = document.getElementById('startAutomation');
+        this.stopAutomationBtn = document.getElementById('stopAutomation');
+        
+        this.robotIpInput.value = this.lastIP;
+      }
+
+      initEventListeners() {
+        // 连接按钮事件
+        this.connectBtn.addEventListener('click', () => this.toggleConnection());
+        this.robotIpInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.toggleConnection();
+        });
+
+        // 方向按钮事件
+        this.btnForward.addEventListener('mousedown', () => this.sendCommand('MoveCar', '1'));
+        this.btnForward.addEventListener('mouseup', () => this.sendCommand('MoveCar', '0'));
+        this.btnForward.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          this.sendCommand('MoveCar', '1');
+        });
+        this.btnForward.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          this.sendCommand('MoveCar', '0');
+        });
+        
+        this.btnBackward.addEventListener('mousedown', () => this.sendCommand('MoveCar', '2'));
+        this.btnBackward.addEventListener('mouseup', () => this.sendCommand('MoveCar', '0'));
+        this.btnBackward.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          this.sendCommand('MoveCar', '2');
+        });
+        this.btnBackward.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          this.sendCommand('MoveCar', '0');
+        });
+        
+        this.btnLeft.addEventListener('mousedown', () => this.sendCommand('MoveCar', '3'));
+        this.btnLeft.addEventListener('mouseup', () => this.sendCommand('MoveCar', '0'));
+        this.btnLeft.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          this.sendCommand('MoveCar', '3');
+        });
+        this.btnLeft.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          this.sendCommand('MoveCar', '0');
+        });
+        
+        this.btnRight.addEventListener('mousedown', () => this.sendCommand('MoveCar', '4'));
+        this.btnRight.addEventListener('mouseup', () => this.sendCommand('MoveCar', '0'));
+        this.btnRight.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          this.sendCommand('MoveCar', '4');
+        });
+        this.btnRight.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          this.sendCommand('MoveCar', '0');
+        });
+        
+        // 停止按钮
+        this.btnStop.addEventListener('click', () => this.sendCommand('MoveCar', '0'));
+
+        // 滑块事件
+        this.speedControl.addEventListener('input', (e) => {
+          document.getElementById('speedValue').textContent = e.target.value;
+          this.sendCommand('Speed', e.target.value);
+        });
+
+        this.lightControl.addEventListener('input', (e) => {
+          document.getElementById('lightValue').textContent = e.target.value;
+          this.sendCommand('Light', e.target.value);
+        });
+
+        // 自动化按钮
+        this.startAutomationBtn.addEventListener('click', () => {
+          this.sendCommand('Command', 'start');
+          this.showNotification("已启动自动清洁模式", "success");
+        });
+
+        this.stopAutomationBtn.addEventListener('click', () => {
+          this.sendCommand('Command', 'stop');
+          this.showNotification("已停止自动清洁模式", "info");
+        });
+      }
+
+      toggleConnection() {
+        const ip = this.robotIpInput.value.trim();
+        
+        if (!ip) {
+          this.showNotification("请输入机器人IP地址", "danger");
+          return;
+        }
+
+        if (!this.isValidIP(ip)) {
+          this.showNotification("IP地址格式无效", "danger");
+          return;
+        }
+
+        if (this.isConnected) {
+          this.disconnectFromRobot();
+        } else {
+          this.connectToRobot(ip);
+        }
+      }
+
+      isValidIP(ip) {
+        return /^(\d{1,3}\.){3}\d{1,3}$/.test(ip);
+      }
+
+      connectToRobot(ip) {
+        this.updateStatus("连接中...", "warning");
+        
+        // 连接到控制WebSocket
+        this.robotWebSocket = new WebSocket(`ws://${ip}/CarInput`);
+        
+        this.robotWebSocket.onopen = () => {
+          this.isConnected = true;
+          this.updateStatus("已连接", "success");
+          this.connectText.textContent = '断开连接';
+          this.connectBtn.classList.replace('btn-outline-success', 'btn-outline-danger');
+          localStorage.setItem('lastRobotIP', ip);
+          
+          // 连接到摄像头流
+          this.connectCameraStream(ip);
+          
+          // 发送初始值
+          this.sendCommand('Speed', this.speedControl.value);
+          this.sendCommand('Light', this.lightControl.value);
+          
+          this.showNotification("成功连接到机器人", "success");
+        };
+        
+        this.robotWebSocket.onclose = () => {
+          this.handleDisconnection();
+        };
+        
+        this.robotWebSocket.onerror = (error) => {
+          console.error('控制WebSocket错误:', error);
+          this.updateStatus("连接失败", "danger");
+          this.handleDisconnection();
+          this.showNotification("连接失败，请检查IP和网络", "danger");
+        };
+      }
+
+      connectCameraStream(ip) {
+        if (this.cameraWebSocket) {
+          this.cameraWebSocket.close();
+        }
+
+        this.cameraWebSocket = new WebSocket(`ws://${ip}/Camera`);
+        this.cameraWebSocket.binaryType = 'blob';
+        
+        this.cameraWebSocket.onopen = () => {
+          this.cameraPlaceholder.classList.add('d-none');
+          this.cameraImage.classList.remove('d-none');
+        };
+        
+        this.cameraWebSocket.onmessage = (event) => {
+          this.cameraImage.src = URL.createObjectURL(event.data);
+        };
+        
+        this.cameraWebSocket.onerror = (error) => {
+          console.error('摄像头WebSocket错误:', error);
+          this.cameraPlaceholder.classList.remove('d-none');
+          this.cameraImage.classList.add('d-none');
+        };
+        
+        this.cameraWebSocket.onclose = () => {
+          if (this.isConnected) {
+            setTimeout(() => this.connectCameraStream(ip), 2000);
+          }
+        };
+      }
+
+      handleDisconnection() {
+        this.isConnected = false;
+        this.updateStatus("未连接", "disconnected");
+        this.connectText.textContent = '连接';
+        this.connectBtn.classList.replace('btn-outline-danger', 'btn-outline-success');
+        
+        if (this.cameraWebSocket) {
+          this.cameraWebSocket.close();
+          this.cameraPlaceholder.classList.remove('d-none');
+          this.cameraImage.classList.add('d-none');
+        }
+      }
+
+      disconnectFromRobot() {
+        if (this.robotWebSocket) {
+          this.robotWebSocket.close();
+        }
+        this.handleDisconnection();
+        this.showNotification("已断开连接", "info");
+      }
+
+      sendCommand(key, value) {
+        if (this.robotWebSocket && this.robotWebSocket.readyState === WebSocket.OPEN) {
+          this.robotWebSocket.send(`${key},${value}`);
+          console.log(`发送命令: ${key}, ${value}`);
+        } else {
+          console.warn("WebSocket未连接，无法发送命令");
+          this.showNotification("未连接到机器人", "warning");
+        }
+      }
+
+      updateStatus(message, status) {
+        this.connectionStatus.textContent = message;
+        
+        // 移除所有状态类
+        this.connectionStatus.classList.remove(
+          'status-connected', 
+          'status-disconnected', 
+          'status-connecting', 
+          'status-error'
+        );
+        
+        // 添加当前状态类
+        switch(status) {
+          case 'success':
+            this.connectionStatus.classList.add('status-connected');
+            break;
+          case 'warning':
+            this.connectionStatus.classList.add('status-connecting');
+            break;
+          case 'danger':
+            this.connectionStatus.classList.add('status-error');
+            break;
+          default:
+            this.connectionStatus.classList.add('status-disconnected');
+        }
+      }
+      
+      showNotification(message, type) {
+        // 在实际项目中可以添加更美观的通知系统
+        console.log(`[${type.toUpperCase()}] ${message}`);
+        alert(`[${type === 'danger' ? '错误' : type === 'warning' ? '警告' : '信息'}] ${message}`);
+      }
+    }
+
+    // 页面加载时初始化控制器
+    document.addEventListener('DOMContentLoaded', () => {
+      const controller = new RobotController();
+      
+      // 添加Bootstrap图标
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+      document.head.appendChild(link);
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
